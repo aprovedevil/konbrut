@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Post;
 
 class AdminController extends Controller
 {
@@ -16,6 +17,7 @@ class AdminController extends Controller
     }
 
     public function account() {
-        return view("admin.account");
+        $posts = Post::all();
+        return view('admin.account', ['posts' => $posts]);
     }
 }

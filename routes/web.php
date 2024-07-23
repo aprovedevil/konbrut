@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\SiswaController;
-// use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\VerifikasiController;
+
 
 // Public Route
 Route::get('/', function () {
@@ -17,13 +19,15 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified', 'redirect'])->name('dashboard');
 
-// Route::resource('posts', PostController::class)->middleware('auth');
 
 // Authenticated User Routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::resource('posts', PostController::class)->middleware('auth');
+    Route::get('/posts/{post}/download', [PostController::class, 'download'])->name('user.posts.download');
+    Route::get('/posts/{post}/download', [PostController::class, 'download'])->name('posts.download');
 });
 
 // Admin Routes
@@ -41,5 +45,8 @@ Route::middleware(['auth', 'siswa'])->group(function () {
 Route::middleware(['auth', 'guru'])->group(function () {
     Route::get('guru/dashboard', [GuruController::class, 'index'])->name('guru.dashboard');
 });
+
+
+Route::post('/verifikasi/{post}', [VerifikasiController::class, 'verifikasi'])->name('verifikasi');
 
 require __DIR__.'/auth.php';

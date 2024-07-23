@@ -1,8 +1,14 @@
-<x-admin-layout>
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Data Pendaftaran') }}
+        </h2>
+    </x-slot>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     @if (session('success'))
                         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
                             class="fixed top-0 right-0 z-50 mt-6 mr-6">
@@ -20,6 +26,12 @@
                         </div>
                     @endif
 
+                    @if ($posts->count() < 1)
+                        <a href="{{ route('posts.create') }}"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-3 mt-6">Buat
+                            Posting Baru</a>
+                    @endif
+
                     <div class="overflow-x-hidden mt-5">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -34,7 +46,7 @@
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Nomor Kursi
+                                        Nomoer Tiket
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -65,12 +77,24 @@
                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $post->alamat }}
                                         </td>
-                                        <td>
-                                            <button class="text-green-500 btn-verifikasi"
-                                                data-post-id="{{ $post->id }}"
-                                                data-verified="{{ $post->verified ? 'true' : 'false' }}">
-                                                {{ $post->verified ? 'Terdaftar' : 'Verifikasi' }}
-                                            </button>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            @if ($post->verified)
+                                                <a href="{{ route('posts.download', $post) }}"
+                                                    class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Download</a>
+                                            @else
+                                                <a href="{{ route('posts.show', $post->id) }}"
+                                                    class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Lihat</a>
+                                                <a href="{{ route('posts.edit', $post->id) }}"
+                                                    class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 ml-2">Edit</a>
+                                                <form action="{{ route('posts.destroy', $post->id) }}" method="POST"
+                                                    class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 ml-2"
+                                                        onclick="return confirm('Apakah Anda yakin ingin menghapus posting ini?')">Hapus</button>
+                                                </form>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
@@ -81,36 +105,4 @@
             </div>
         </div>
     </div>
-</x-admin-layout>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.btn-verifikasi').forEach(button => {
-            button.addEventListener('click', function() {
-                let postId = this.dataset.postId;
-                let verified = this.dataset.verified === 'true';
-    
-                if (!verified) {
-                    // Kirim permintaan AJAX untuk verifikasi hanya jika statusnya belum terverifikasi
-                    fetch(`/verifikasi/${postId}`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            // Perbarui status verifikasi di sisi klien jika permintaan berhasil
-                            if (data.message === 'Data berhasil diverifikasi') {
-                                this.dataset.verified = 'true';
-                                this.innerText = 'Terdaftar';
-                            }
-                        })
-                        .catch(error => console.error('Error:', error));
-                }
-            });
-        });
-    });
-    </script>
-    
+</x-app-layout>

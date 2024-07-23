@@ -53,4 +53,9 @@ class User extends Authenticatable
     public function isGuru(){
         return $this->usertype === 'guru';
     }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class); //menentukan relasi antara tabel user dan post or //hasMany untuk relasi one to many
+    }
 }
